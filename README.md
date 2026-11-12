@@ -1,0 +1,58 @@
+# Nearby Owners
+
+A phone web app that uses your location to look up the owners of nearby homes in
+Tarrant County and alerts you when any look **non owner-occupied**.
+
+**Live:** https://briangooding.github.io/nearby-owners/
+
+Moved here from `bg_github/nearby-owners/` in November 2026. The old address forwards to this one, and Home Screen apps installed from it keep working.
+
+## On your iPhone
+
+Open the Live link in Safari, tap Share, then **Add to Home Screen**. It opens full screen with its
+own icon and opens without signal (searching still needs a connection). Safari shows a one-time tip
+explaining this.
+
+## How it works
+
+- Ownership comes from the Tarrant Appraisal District (TAD) roll, read through Tarrant County's
+  public parcel map service (`mapit.tarrantcounty.com/.../Dynamic/TADParcels/FeatureServer/0`). tad.org
+  itself has no public API, and browsers can't scrape it directly.
+- It finds every parcel within 500 ft, ¼ mile or ½ mile of you, and flags a home when:
+  - the tax bill is mailed somewhere other than the house, or
+  - the owner's mailing address is out of state, or
+  - the owner is a company (LLC, LP, Inc, "Properties", "Holdings", …).
+- Homestead exemptions are ignored.
+- Vacant lots and buildings over 5,000 sq ft (apartment complexes, offices, big retail) are skipped,
+  since the county data doesn't say which parcels are homes. Small shops can still show up.
+- **High quality** (gold, in its own section at the top) = the owner's mailing address is out of state.
+- **Strong match** = two or more signals. **Possible** = one.
+- Small differences between the mailing address and the house (typos, plurals, "Avenue" vs "Ave",
+  unit numbers) are ignored; the house number has to match.
+- After you tap **Start** it keeps checking as you move (every ~150 ft). Searching an address pauses
+  this until you tap Start again.
+- It sends a notification (and vibrates) when a new flagged home turns up as you move. Tapping
+  Start asks for notification permission. This only works while the app is open; browsers don't
+  allow background location for web apps.
+- Homes that look owner-occupied aren't listed. **Unclear** holds homes with no mailing address to
+  compare.
+- Each home is a compact row (address, owner and tag, mailing address); tap it for size, year built,
+  reasons, account number and the Map / TAD / Copy links.
+- **Export to Excel & share** builds an .xlsx of every home from the last search (category, owner,
+  mailing address, reasons, account, map link) plus a summary sheet. On a phone it opens the share
+  sheet so you can pick Mail; on a computer it downloads the file and opens an email draft.
+- The moon/sun button in the top-right corner switches between light and dark (remembered); until
+  you tap it, the app follows your phone's setting.
+- **Check another spot** searches by street address instead of GPS. It's forgiving: "1200 Magnolia
+  Avenue, Fort Worth TX 76104" finds 1200 W MAGNOLIA AVE, and a typed city picks between towns.
+
+Flags are a best guess. Confirm on [tad.org](https://www.tad.org/) before acting on one.
+
+## Run locally
+
+```sh
+python3 -m http.server 8000   # from this folder, then open http://localhost:8000
+node --test                                          # logic tests
+```
+
+Location access needs `https://` or `localhost`.
